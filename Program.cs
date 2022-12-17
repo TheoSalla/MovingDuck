@@ -1,177 +1,97 @@
-﻿using System.ComponentModel;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Text;
+﻿
 
-Console.Clear();
-Thread.Sleep(500);
-
-
-try
+internal class Program
 {
-    // Create a Task for each thread
-    // Task duck1Task = Task.Factory.StartNew(() => MovingDuck(0));
-    // Task duck3Task = Task.Factory.StartNew(() => MovingDuck(14));
-    Task duck5Task = Task.Factory.StartNew(() => MovingDuck4Async(0, "Duck2", ConsoleColor.DarkMagenta));
-    Task duck6Task = Task.Factory.StartNew(() => MovingDuck4Async(15, "Duck3", ConsoleColor.Red));
-    Task duck4Task = Task.Factory.StartNew(() => MovingDuck4Async(30, "Duck1", ConsoleColor.DarkCyan));
+    private static readonly object consoleLock = new object();
 
-    // Wait for all tasks to complete
-    while (true)
+
+    private static void Main(string[] args)
     {
-    }
+        Console.Clear();
+        // Console.WindowWidth = 180;
+        // Console.WindowHeight = 125;
+        // Console.WindowWidth = 80;
+        // Console.WindowHeight = 25;
+        // Console.BufferWidth = 80;
+        // Console.BufferHeight = 25;
+        Console.SetWindowSize(80, 25);
+        Console.BufferWidth = 500;
+        Console.BufferHeight = 50;
 
 
-    Task.WaitAll(duck4Task, duck5Task, duck6Task);
+        Thread.Sleep(2000);
+        Task task = Task.Factory.StartNew(() => RunningDuck(0));
+        Task task2 = Task.Factory.StartNew(() => RunningDuck(10));
 
-}
-catch (Exception ex)
-{
-    Console.WriteLine("An error occurred: " + ex.Message);
-}
-
-// Thread duck1 = new Thread(() => MovingDuck(0));
-// Thread duck2 = new Thread(() => MovingDuck(7));
-// Thread duck3 = new Thread(() => MovingDuck(14));
-
-// Thread duck1 = new(() => MovingDuck2(0, 1000));
-// duck1.Name = "Duck1";
-// Thread duck2 = new(() => MovingDuck2(7, 5));
-// Thread duck3 = new(() => MovingDuck2(14, 200));
-// duck3.Name = "Duck3";
-// Thread duck2 = new Thread(MovingDuck);
-// Thread duck3 = new Thread(MovingDuck);
-// duck1.Start();
-// // duck2.Start();
-// duck3.Start();
-
-
-
-async Task MovingDuck4Async(int startPosition, string name, ConsoleColor color)
-{
-
-    Thread.CurrentThread.Name = name;
-    string character = @"
-     __
- ___( o)>
- \ <_. )
-  `---'
-";
-
-    int moveWhiteSpaces = 0;
-    while (true)
-    {
-        System.Console.WriteLine();
-        foreach (string line in character.Split('\n'))
+        while (true)
         {
-            for (int i = 0; i < moveWhiteSpaces; i++)
-            {
-                Console.Write(" ");
-            }
-            // Console.ForegroundColor = color;
-            Console.WriteLine(line);
-            // Console.ResetColor();
+
         }
 
-        moveWhiteSpaces += 5;
-        Thread.Sleep(1000);
-        Console.MoveBufferArea();
-        Console.SetCursorPosition(0, startPosition);
 
     }
-}
-
-void MovingDuck3(int y, int speed)
-{
-    string DuckBody = @$" Donald {Thread.CurrentThread.Name}
-     __
- ___( o)>
- \ <_. )
-  `---'
-";
-    List<string> s = DuckBody.Split('\n').ToList();
-    int xPos = 0;
-
-    // Create a Stopwatch to measure the time elapsed between iterations
-    Stopwatch stopwatch = new Stopwatch();
-    stopwatch.Start();
-
-    while (true)
+    static void RunningDuck(int position)
     {
-        // Use the console.Write() method to update the output
-        Console.CursorTop = y;
-        Console.CursorLeft = xPos;
-        Console.Write(DuckBody);
 
-        // Measure the time elapsed and use it to determine the delay for the next iteration
-        long elapsedMilliseconds = stopwatch.ElapsedMilliseconds;
-        stopwatch.Restart();
-        int delay = (int)Math.Max(0, speed - elapsedMilliseconds);
-        Thread.Sleep(delay);
-
-        xPos++;
-    }
-
-}
-
-void MovingDuck2(int y, int speed)
-{
-    string DuckBody = @$"
-     __
- ___( o)>
- \ <_. )
-  `---'
+        string duck = @"
+    __
+___( o)>
+\ <_. )
+ `---'
 ";
-    List<string> s = DuckBody.Split('\n').ToList();
-    int xPos = 0;
-    while (true)
-    {
-        int counter = 0;
-        for (int i = 0; i < 6; i++)
+        List<string> s = duck.Split('\n').ToList();
+
+        int start = 0;
+        while (true)
         {
-            Console.SetCursorPosition(xPos, y + counter);
-            Thread.Sleep(1);
-            counter++;
-            System.Console.WriteLine(s[i]);
-            if (counter == 4)
+            int counter = 0;
+            lock (consoleLock)
             {
-                counter = 0;
+                try
+                {
+                    Console.CursorTop = position;
+                    foreach (var item in s)
+                    {
+                        Console.CursorLeft = start;
+                        Console.WriteLine(item);
+
+                        // Console.CursorLeft = start - 8;
+                        // Console.WriteLine(" ");
+
+                    }
+                    Thread.Sleep(1000);
+
+                    start += 8;
+
+
+                }
+                catch (System.Exception)
+                {
+                    throw;
+                }
             }
 
         }
-        Thread.Sleep(speed);
-
-        xPos++;
     }
+
+
+
+
+
+
+    // Console.WriteLine("Here am I");
+    // Console.WriteLine("Here am I now");
+    // Console.CursorLeft += 60;
+    // Console.Write("Here am I now");
+
 
 }
 
-void MovingDuck(int y)
-{
-    string track = "_________________________________________________________________________________________________";
-    var rand = new Random();
-    int Speed = rand.Next(100, 1000);
-    int x = 0;
-    Console.Clear();
-    // Console.CursorVisible = false;
-    while (true)
-    {
-        Console.SetCursorPosition(x, y);
-        Console.WriteLine("     __");
+// You can use the Console.SetCursorPosition() method to set the cursor position to a specific row and column in the console buffer.
+// You can use the Console.MoveBufferArea() method to move a rectangular region of characters within the console buffer. 
+// This will cause the console to be refreshed, and the moved characters will be displayed in the console window.
+// You can use the Console.CursorLeft and Console.CursorTop properties to move the cursor to a new location relative to its current position. 
+// For example, you can use Console.CursorLeft += 10 to move the cursor 10 columns to the right.
 
-        Console.SetCursorPosition(x, y + 1);
-        Console.WriteLine(" ___( o)>");
-
-        Console.SetCursorPosition(x, y + 2);
-        Console.WriteLine(" \\ <_. )");
-
-        Console.SetCursorPosition(x, y + 3);
-        Console.WriteLine("  `---'");
-
-        x++;
-        Thread.Sleep(Speed);
-        Speed = rand.Next(10, 700);
-        // Console.Clear();
-
-    }
-}
+// It's also worth noting that the console window can be refreshed manually using the Console.Clear() method, 
+// which will clear the console buffer and reset the cursor position to the top-left corner of the console window.
